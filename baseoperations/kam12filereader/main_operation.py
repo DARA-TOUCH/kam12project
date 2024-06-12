@@ -8,7 +8,6 @@ from exceptions import InvalidIncomeCodeError, InvalidSourceError, InvalidInOutV
 from hidden_operation import GroupID, Stamp
 
 
-
 class BudgetAccount:
     """
     - This class is created an object based on pandas library and excel file downloaded from https://stats-admin.customs.gov.kh/
@@ -115,14 +114,13 @@ class SADDetail:
     STAMP_DATA = Stamp()
     STAMP_DATA_DF = STAMP_DATA.get_dataframe()
     GROUP_DATA = GroupID()
-    IM_GROUP_DF = GROUP_DATA.get_dataframe()
-    EX_GROUP_DF = GROUP_DATA.get_dataframe()
+    IM_GROUP_DF = GROUP_DATA.get_IM_dataframe()
+    EX_GROUP_DF = GROUP_DATA.get_EX_dataframe()
 
     TRANSACTION_MAP = {
                     "IM": ["I", "SI", "D"],
                     "EX": ["E", "SE"],
                     }
-    
     def __init__(self, file_path: str):
         assert (
             Path(file_path).suffix.lower() == ".xlsx"
@@ -133,11 +131,12 @@ class SADDetail:
 
         self.__convert_to_datetime()
 
+        # The problem is here.
         self.dataframe = (self.df
                   .merge(self.IM_GROUP_DF, how="left", left_on=COLUMN_LABELS["hs_code"], right_on="Commodity Code")
                   .merge(self.EX_GROUP_DF, how="left", left_on=COLUMN_LABELS["hs_code"], right_on="Commodity Code")
                   .merge(self.STAMP_DATA_DF, how="left", left_on=COLUMN_LABELS["hs_code"], right_on="hs_code"))
-
+        # print(self.STAMP_DATA_DF)   
 
         # Rename columns
         self.dataframe.rename(columns={'group_id_x': 'IM_group_id', 'group_id_y': 'EX_group_id'}, inplace=True)
@@ -167,6 +166,31 @@ class SADDetail:
             - DataFrame: DataFrame of the object.
         """
         return self.dataframe
+
+    def get_data_by_group_id(self, group_id: int, transaction: str):
+        """
+            - This function is usef for TEST getting data (SAD) filtered by group_id.
+        """
+        
+        list_transaction_map = list(self.TRANSACTION_MAP.keys())
+        
+        if transaction.upper() not in list_transaction_map:
+            raise KeyError(
+                f"Invalid transaction key: {transaction}. Two valid transaction keys: IM, EX (Any uppercase or lowercase)"
+            )
+
+        dataframe_by_group_id = self.dataframe[
+                self.dataframe[f"{transaction.upper()}_group_id"].isin([int(group_id)])
+            & 
+                self.dataframe[COLUMN_LABELS["reg_serial"]].isin(self.TRANSACTION_MAP[transaction.upper()])
+            & (
+                self.dataframe[COLUMN_LABELS["national_procedure"]].isin(["", " ", "000"]) 
+            |
+                self.dataframe[COLUMN_LABELS["national_procedure"]].isnull()
+            )
+        ]
+        print(self.TRANSACTION_MAP[transaction.upper()])
+        return dataframe_by_group_id
 
 
     def get_value_by_serial(self, value_code: str, serial: str):
@@ -308,7 +332,7 @@ class SADDetail:
                 f"Invalid conlumn: {value_code}. Valid value_code: {[item for item in NUMERIC_OBJECTS]}"
             )
         
-        if transaction.upper() not in self.TRANSACTION_MAP.keys():
+        if transaction.upper() not in list(self.TRANSACTION_MAP.keys()):
             raise KeyError(
                 f"Invalid transaction key: {transaction}. Two valid transaction keys: IM, EX (Any uppercase or lowercase)"
             )
@@ -324,6 +348,22 @@ class SADDetail:
             )
         ]
         return filter_df[COLUMN_LABELS[value_code.lower()]].sum()
+
+    
+    def get_value_by_only_group_id(self, value_code: list, group_id: list, Import: bool = True, Export: bool = False):
+        """
+        This function is updated from get_value_by_group_id function.
+        Args: 
+            - value_code (list): List of column name where we want to calculate.
+            - group_id (int): For import, rangge from 1-52 and export, range from 1-29.
+        Return: Total value in column for GroupType (Import or Export) that specified by value_code.
+        """
+        if any(code not in NUMERIC_OBJECTS for code in value_code):
+            raise KeyError(
+                f"Invalid conlumn: {value_code}. Valid value_code: {[item for item in NUMERIC_OBJECTS]}"
+            )
+        pass
+        
 
 
     def check_available_IM_group_id(self):
@@ -390,3 +430,9 @@ class SADDetail:
         """
         data_filter = self.dataframe[self.dataframe['short_description'] == short_description.lower()]
         return data_filter[COLUMN_LABELS['package']].sum()
+
+
+filepath = '/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx'
+test = SADDetail("/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx")
+dara = test.get_data()
+dara.to_excel('/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/test.xlsx', index=False)

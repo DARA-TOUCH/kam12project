@@ -6,7 +6,7 @@ __all__ = ['GroupID', 'Stamp']
 
 def _get_file_path(file_name: str):
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    data_dir = os.path.abspath(os.path.join(script_dir, '..', '..', 'static', 'csv'))
+    data_dir = os.path.abspath(os.path.join(script_dir, '..', '..', 'staticfiles', 'excel', 'csv'))
 
     group_by_hs_file = os.path.join(data_dir, 'group_by_hs.csv')
     stamp_by_hs_file = os.path.join(data_dir, 'stamp_by_hs.csv')

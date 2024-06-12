@@ -77,6 +77,7 @@ NUMERIC_OBJECTS = frozenset(
         "crp",
         "stf",
         "cop",
+        'cpp',
         "khr_value",
         "vpp",
         "dpp",
@@ -107,7 +108,7 @@ STRING_OBJECTS = frozenset(
 )
 
 __file_path = os.path.abspath(__file__)
-stamp_file_path = os.path.abspath(os.path.join(__file_path, "..", "..", "..", 'static', 'csv', 'stamp_by_hs.csv'))
+stamp_file_path = os.path.abspath(os.path.join(__file_path, "..", "..", "..", 'staticfiles', 'excel', 'csv', 'stamp_by_hs.csv'))
 
 stamp_dataframe = pd.read_csv(stamp_file_path)
 stamp_item_list = stamp_dataframe['stamp_kind'].unique()
