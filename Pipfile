@@ -1,0 +1,14 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
+
+backend\staticfiles\excel\xlsx\SAD.xlsx
+C:\Users\Touch Dara\Documents\GitHub\kam12project\backend\staticfiles\excel\xlsx\SAD.xlsx

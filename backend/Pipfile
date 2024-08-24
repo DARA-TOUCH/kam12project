@@ -8,6 +8,7 @@ pandas = "*"
 openpyxl = "*"
 django = "*"
 djangorestframework = "*"
+numpy = "*"
 
 [dev-packages]
 

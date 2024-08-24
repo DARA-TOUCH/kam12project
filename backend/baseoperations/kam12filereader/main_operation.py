@@ -432,7 +432,7 @@ class SADDetail:
         return data_filter[COLUMN_LABELS['package']].sum()
 
 
-filepath = '/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx'
-test = SADDetail("/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx")
-dara = test.get_data()
-dara.to_excel('/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/test.xlsx', index=False)
+# filepath = '/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx'
+# test = SADDetail("/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx")
+# dara = test.get_data()
+# dara.to_excel('/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/test.xlsx', index=False)
