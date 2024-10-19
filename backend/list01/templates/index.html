@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %} Create List01 {% endblock %}
+
+{% block content %}
+
+<h1>List01</h1>
+<form method="POST" action="{% url 'list01:create_list01' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="btn btn-primary">
+        <div class="btn btn-primary">
+            <label for="sad_detail">SAD Detail File</label>
+            <input type="file" name="sad_detail" id="sad_detail">
+        </div>
+            
+        <div class="btn btn-primary">
+            <label for="budget">Budget File</label>
+            <input type="file" name="budget" id="budget">
+        </div>
+        
+        <div class="btn btn-primary">
+            <label for="salakabatt">Budget File</label>
+            <input type="file" name="salakabatt" id="salakabatt">
+        </div>
+
+        <!-- <input type="submit" value="Start List01 Processing"> -->
+        <div>
+            <button class="btn btn-primary">Create List01</button>
+        </div>
+    </div>
+</form>
+<div id="success-message" class="mt-3" style="display: none;">
+    <div class="alert alert-success">File processed successfully</div>
+</div>
+
+
+<script>
+    document.getElementById('upload-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            } else {
+                throw new Error('File upload failed');
+            }
+        })
+        .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'List01.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            document.getElementById('success-message').style.display = 'block';
+        })
+        .catch(error => {
+            console.error(error);
+            alert('An error occurred while processing the file.');
+        });
+    });
+</script>
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% endblock %}
