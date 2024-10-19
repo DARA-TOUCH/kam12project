@@ -9,6 +9,9 @@ openpyxl = "*"
 django = "*"
 djangorestframework = "*"
 numpy = "*"
+djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
+selenium = "*"
 
 [dev-packages]
 

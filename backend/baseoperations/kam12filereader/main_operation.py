@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 import datetime
 from pathlib import Path
-from static_object import COLUMN_LABELS, STRING_OBJECTS, NUMERIC_OBJECTS
-from exceptions import InvalidIncomeCodeError, InvalidSourceError, InvalidInOutValueError, \
+from .static_object import COLUMN_LABELS, STRING_OBJECTS, NUMERIC_OBJECTS
+from .exceptions import InvalidIncomeCodeError, InvalidSourceError, InvalidInOutValueError, \
                         InvalidDateValueError, InvalidNumericValueCodeError, InvalidSerialError
-from hidden_operation import GroupID, Stamp
+from .hidden_operation import *
+
+
+# from static_object import COLUMN_LABELS, STRING_OBJECTS, NUMERIC_OBJECTS
+# from exceptions import InvalidIncomeCodeError, InvalidSourceError, InvalidInOutValueError, \
+#                         InvalidDateValueError, InvalidNumericValueCodeError, InvalidSerialError
+# from hidden_operation import *
 
 
 class BudgetAccount:
@@ -14,7 +20,13 @@ class BudgetAccount:
         So, in order to make this class work properly, pandas library have to be installed.
     - file_path: is path to xlsx file.
     """
-
+    GDCE_INCOME_CODES = [
+        'VPP', 'VOP', 'VAP', 'SPP', 'SOP', 'COP', 'OSF', 'DSF', 'TRF', 'TFT', 'TFF', 'TFN', 'TFB', 'TFS', 'TFP', 'TFA', 
+        'OFS', 'CPP', 'ATP', 'AUC', 'PIM', 'CRP', 'ETW', 'ETR', 'ETP', 'ETO', 'PEX', 'SOS', 'VVF', 'CSF', 'STF', 'TSF', 
+        'CCS', 'SOM', 'SOV', 'SOD', 'SOE', 'SOO', 'CBF', 'CDF', 'CDL', 'CDO', 'CDT', 'CPF', 'PFC', 'PFL', 'PFN', 'PFF', 
+        'PFP', 'TID', 'VAF', 'ARF', 'OOD', 'CII', 'CIO', 'NII', 'NIO', 'CEF', 'OTF', 'TRF', 'TFT', 'TFF', 'TFN', 'TFB', 
+        'TFS', 'TFP', 'TFA', 'TSL', 'BTL', 'TSM', 'BWM', 'CBL', 'ROL', 'ROB', 'ROO', 'SCF', 'SFS', 'SFL', 'ORB'
+    ]
     def __init__(self, file_path: str):
         self.df = pd.read_excel(file_path)
         self.df["Receipt Date"] = pd.to_datetime(self.df["Receipt Date"], format="%Y-%m-%d")
@@ -85,16 +97,13 @@ class BudgetAccount:
 
     
     def get_return_amount_by_date(self, income_code: str, in_or_out: str, date_val=None):
-        if date_val is None:
-            date_val = datetime.datetime.now()
-
         if in_or_out.upper() not in ["I", "O"]:
             raise InvalidInOutValueError(f"Invalid in_or_out value: {in_or_out}. Valid values are I and O.")
         if not isinstance(date_val, datetime.datetime):
-            raise InvalidDateValueError(f"Invalid date value: {date_val}. Date value should be in datetime.datetime format.")
-        if income_code.upper() not in self.__available_income_codes():
-            raise InvalidIncomeCodeError(f"Invalid income code: {income_code}. Available income codes are: {self.__available_income_codes()}")
-
+            raise InvalidDateValueError(f"Invalid date value: {date_val}. Date value should be in datetime.datetime object.")
+        if income_code.upper() not in self.GDCE_INCOME_CODES:
+            raise InvalidIncomeCodeError(f"Invalid income code: {income_code}. Available income codes are: {self.GDCE_INCOME_CODES}")
+        
         return self.df[(self.df["Receipt Date"] == date_val) & \
                 (self.df["in_out"] == in_or_out.upper()) & \
                 (self.df["Budget Code"] == income_code.upper())]["Amount"].sum()
@@ -430,9 +439,3 @@ class SADDetail:
         """
         data_filter = self.dataframe[self.dataframe['short_description'] == short_description.lower()]
         return data_filter[COLUMN_LABELS['package']].sum()
-
-
-# filepath = '/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx'
-# test = SADDetail("/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/SAD.xlsx")
-# dara = test.get_data()
-# dara.to_excel('/Users/touchdara/Desktop/kam12project/staticfiles/excel/xlsx/test.xlsx', index=False)

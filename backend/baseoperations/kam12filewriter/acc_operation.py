@@ -62,7 +62,3 @@ class AccReport:
 
     def save_report(self):
         self.acc_wb.save(OUT_ACC_REPORT_PATH)
-
-
-# test = AccReport()
-# test.get_import_stat()

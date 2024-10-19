@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +28,7 @@ SECRET_KEY = 'django-insecure-*j8s937@q6ow)=iro==w(%tb#6!a%ic=x%xz%ijakv7&(s)on#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -38,29 +40,36 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api',
+    'list01',
     'rest_framework',
+    'rest_framework_simplejwt',
     'core',
-    'admin_report',
     'acc_report',
-    # 'baseoperations',
+    'corsheaders',
+
+    'java',
+
+    'baseoperations.kam12filereader',
+    'baseoperations.kam12list01',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 ROOT_URLCONF = 'report.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -127,7 +136,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -135,14 +145,19 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # Optional, can be removed if not needed
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
     ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+# DEBUG = False

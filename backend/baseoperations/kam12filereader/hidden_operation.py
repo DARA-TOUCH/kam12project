@@ -1,5 +1,6 @@
 import pandas as pd
-from static_object import COLUMN_LABELS
+from .static_object import COLUMN_LABELS
+# from static_object import COLUMN_LABELS
 import os
 
 __all__ = ['GroupID', 'Stamp']

@@ -1,6 +1,6 @@
 from django import forms
 
-
-class FileUploadForm(forms.Form):
-    sad_file = forms.FileField()
-    budget_file = forms.FileField()
+class UploadFileForm(forms.Form):
+    sad_file = forms.FileField(label='Upload SAD File')
+    budget_file = forms.FileField(label='Upload Budget File')
+    
