@@ -5,78 +5,49 @@ import os
 import datetime
 
 
-FILES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'staticfiles', 'excel', 'xlsx'))
-
-
-ALL_FILES = [
-    '/Users/touchdara/Documents/GitHub/kam12project/backend/staticfiles/excel/xlsx/KAM12_MonthlyReport_Jan_2024.xlsx',
-    '/Users/touchdara/Documents/GitHub/kam12project/backend/staticfiles/excel/xlsx/KAM12_MonthlyReport_Jan_2024_1.xlsx',
-    os.path.join(FILES_PATH, 'KAM12_MonthlyReport_Feb_2024.xlsx'),
-    # os.path.join(FILES_PATH, 'KAM12_MonthlyReport_Mar_2024.xlsx'),
-    os.path.join(FILES_PATH, 'KAM12_MonthlyReport_Mar_2024 copy.xlsx'),
-    # '/Users/touchdara/Documents/GitHub/kam12project/backend/temp/budget.xlsx',
-    ]
-
-
 class Salakabatt:
     """
         - Read the individual excel file
     """
-
     def __init__(self, file_path, *args, **kwargs):
-        self.workbook = pd.ExcelFile(file_path, engine='openpyxl')
+        self.__file_path = file_path
+
+
+    def __dataframe(self, data_type: str = 'tax'):
+        try:
+            wb = openpyxl.load_workbook(self.__file_path, data_only=True, read_only=True)
+            tax_sheet = wb.worksheets[0]
+            non_tax_sheet = wb.worksheets[1]
+
+            if data_type == 'tax':
+                data = []
+                for i, row in enumerate(tax_sheet.iter_rows(values_only=True), start=1):
+                    data.append(row)
+            else:
+                """
+                data_type == 'non_tax' or any other value will return non-tax data
+                """
+                data = []
+                for i, row in enumerate(non_tax_sheet.iter_rows(values_only=True), start=1):
+                    data.append(row)
+
+        except Exception as e:
+            pass
+
+        tax_df = pd.DataFrame(data).dropna()
+        non_tax_df = pd.DataFrame(data).dropna()
+
+        if data_type == 'tax':
+            return tax_df
+        return non_tax_df
+
 
     def tax_data(self):
-        """
-            - Read the first sheet of the excel file (សារពើពន្ធ​)
-            - Return: Data from the first sheet of the excel file
-        """
-        tax_df = self.workbook.parse(
-            sheet_name=self.workbook.sheet_names[0],
-            na_filter=False,
-            dtype=object,
-            header=None,
-            )
-        tax_df.iloc[:, 2] = pd.to_datetime(
-            tax_df.iloc[:, 2],
-            dayfirst=True,
-            format='%d/%m/%Y',
-            errors='coerce'
-            )
-        tax_df.iloc[:, 3:19] = tax_df.iloc[:, 3:19].apply(
-            pd.to_numeric,
-            errors='coerce'
-            )
-        tax_df = tax_df[tax_df.iloc[:, 2].notnull()]
-
-        return tax_df
-
+        return self.__dataframe(data_type='tax')
+    
 
     def non_tax_data(self):
-        """
-            - Read the second sheet of the excel file (មិនមែនសារពើពន្ធ​)
-            - Return: Data from the second sheet of the excel file
-        """
-
-        non_tax_df = self.workbook.parse(
-            sheet_name=self.workbook.sheet_names[1],
-            na_filter=False,
-            dtype=object,
-            header=None, 
-        )
-        non_tax_df.iloc[:,2] = pd.to_datetime(
-            non_tax_df.iloc[:, 2],
-            dayfirst=True,
-            format='%d/%m/%Y',
-            errors='coerce'
-        )
-        non_tax_df.iloc[:, 3:19] = non_tax_df.iloc[:, 3:19].apply(
-            pd.to_numeric,
-            errors='coerce'
-        )
-        non_tax_df = non_tax_df[non_tax_df.iloc[:, 2].notnull()]
-
-        return non_tax_df
+        return self.__dataframe(data_type='non_tax')
 
 
 class AllSalakabatt:
@@ -167,7 +138,8 @@ class AllSalakabatt:
         income_by_date = data[data.iloc[:, 2] == date_val].iloc[:, COLUMN_INDEX].sum()
         
         return income_by_date
+# FILES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'staticfiles', 'excel', 'xlsx'))
 
-# dara = AllSalakabatt(ALL_FILES)
-# val = dara.income_by_date(date_val=datetime.datetime(2024, 2, 12), income_code='VoPss')
-# print(val)
+# ALL_FILES = [
+#     "/mnt/c/Users/Asus/OneDrive/Desktop/ProjectTest/KAM12_MonthlyReport_Jan_2024.xlsx",
+#     ]

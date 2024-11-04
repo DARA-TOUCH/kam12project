@@ -8,13 +8,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views import View
 from django.http import FileResponse
-from rest_framework import status
-from rest_framework import status, viewsets
 
 from baseoperations.kam12list01.list01 import List01
 from baseoperations.kam12list01.salakabatt import AllSalakabatt
 
-from django.http import HttpResponse
 
 class List01View(View):
     """
@@ -27,50 +24,70 @@ class List01View(View):
     Attributes:
         None
     """
+    salakabatt_files = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
     def get(self, request, *args, **kwargs):
-        return render(request, 'index.html')
+        return render(request, 'index.html', {'salakabatt_files': self.salakabatt_files})
 
     def post(self, request, *args, **kwargs):
         sad_detail = request.FILES.get('sad_detail')
         budget = request.FILES.get('budget')
-        salakabatt = request.FILES.get('salakabatt')
+        salakabatt_files = [request.FILES.get(f'salakabatt_for_{month}') for month in self.salakabatt_files]
 
+        print(f"Sad Detail: {sad_detail}")
+        print(f"Budget: {budget}")
+        for i, file in enumerate(salakabatt_files, start=1):
+            print(f"File-{i} : {file}")
+
+        # Copy the template file to a new file
         list01_template = os.path.join(settings.BASE_DIR, 'staticfiles', 'excel', 'xlsx', 'List01_Template.xlsx')
         list01_copy = os.path.join(settings.BASE_DIR, 'staticfiles', 'excel', 'xlsx', 'List01.xlsx')
-    
-        # Ensure the directory exists
         os.makedirs(os.path.dirname(list01_copy), exist_ok=True)
         shutil.copy2(list01_template, list01_copy)
 
-        # if not sad_detail or not budget:
-        #     return Response({'error': 'Please upload both files'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create a temporary directory if it doesn't exist
+        print(f' Type of list01_template: {type(list01_template)}')
+        print(f' Type of list01_copy: {type(list01_copy)}')
+    
+        # Make directory for List01. Ensure the directory exists
+        
+        # Create a temporary directory to store the uploaded files (salakabatt)
         temp_dir = os.path.join(settings.BASE_DIR, 'temp', 'list01')
-        os.makedirs(temp_dir, exist_ok=True)
+        temp_dir_sad_and_budget = os.path.join(settings.BASE_DIR, temp_dir, 'list01', 'sad_and_budget')
+        temp_dir_salakabatt = os.path.join(settings.BASE_DIR, temp_dir, 'list01', 'salakabatt')
+        os.makedirs(temp_dir_sad_and_budget, exist_ok=True)
+        os.makedirs(temp_dir_salakabatt, exist_ok=True)
 
-        sad_detail_path = os.path.join(temp_dir, 'sad_detail.xlsx')
-        budget_path = os.path.join(temp_dir, 'budget.xlsx')
-        salakabatt_path = os.path.join(temp_dir, 'salakabatt.xlsx')
+        sad_detail_path = os.path.join(temp_dir_sad_and_budget, 'sad_detail.xlsx')
+        budget_path = os.path.join(temp_dir_sad_and_budget, 'budget.xlsx')
 
-        # Save the uploaded files to the temporary directory
+        # Delete .xlsx files in the temp_dir_salakabatt directory
+        existing_files = glob.glob(os.path.join(temp_dir_salakabatt, '*.xlsx'))
+        for file_path in existing_files:
+            os.remove(file_path)
+
+        # Save salakabatt files to the temp_dir_salakabatt directory
+        for i, file in enumerate(salakabatt_files, start=0):
+            if file:
+                file_path = os.path.join(temp_dir_salakabatt, f'salakabatt_for_{self.salakabatt_files[i]}.xlsx')
+                with open(file_path, 'wb+') as destination:
+                    for chunk in file.chunks():
+                        destination.write(chunk)
+
+        # Save the SAD_Detail and Budget uploaded files to the tem_dir_sad_and_budget directory
         with open(sad_detail_path, 'wb+') as destination:
             for chunk in sad_detail.chunks():
                 destination.write(chunk)
-
         with open(budget_path, 'wb+') as destination:
             for chunk in budget.chunks():
                 destination.write(chunk)
 
-        with open(salakabatt_path, 'wb+') as destination:
-            for chunk in salakabatt.chunks():
-                destination.write(chunk)
+        salakabatt_files = glob.glob(os.path.join(temp_dir_salakabatt, '*.xlsx'))
 
         list01 = List01(
             template_file=list01_copy, 
             budget_file=budget_path, 
             sad_detail_file=sad_detail_path, 
-            list_of_salakabatt_path=[salakabatt_path]
+            list_of_salakabatt_path=salakabatt_files
             )
         list01.write()
 
@@ -98,7 +115,6 @@ class SalakabattDataView(View):
         existing_files = glob.glob(os.path.join(tem_dir, '*.xlsx'))
         for file_path in existing_files:
             os.remove(file_path)
-        
         # Iterate over the files and save them with dynamic filenames
         for i, file in enumerate(files, start=1):
             if file:  # Check if the file exists
@@ -138,12 +154,13 @@ class DownloadSalakabattDataView(View):
         return render(request, 'salakabatt.html')
 
 def cleanup(request):
-    items = ['VPP', 'VOP', 'VAP', 'SPP', 'SOP', 'COP']
-    if request.method == 'POST':
-        for index, item in enumerate(items, start=1):
-            text_value = request.POST.get(f'item_{i}')
-        return HttpResponseRedirect(request.path_info)
-    return render(request, 'cleanup_list01.html', {'items': items})
+    # items = ['VPP', 'VOP', 'VAP', 'SPP', 'SOP', 'COP']
+    # if request.method == 'POST':
+    #     for index, item in enumerate(items, start=1):
+    #         text_value = request.POST.get(f'item_{i}')
+    #     return HttpResponseRedirect(request.path_info)
+    # return render(request, 'cleanup_list01.html', {'items': items})
+    pass
 
 class List01MakeUpView(View):
     def get(self, request, *args, **kwargs):
