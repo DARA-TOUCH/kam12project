@@ -58,6 +58,8 @@ class AllSalakabatt:
         self.files = list_of_file_path
         self.tax_data = self.__all_tax_data()
         self.non_tax_data = self.__all_non_tax_data()
+        # self.tax_data.apply(pd.to_datetime, errors='ignore')
+        # self.non_tax_data.apply(pd.to_datetime, errors='ignore')
 
     def __all_tax_data(self):
         tax_data_list = []
@@ -78,7 +80,7 @@ class AllSalakabatt:
         
         return combined_non_tax_data
 
-    def income_by_date(self, date_val: datetime.datetime, income_code: str):
+    def income_by_date(self, date_val: datetime.date, income_code: str):
         """
              - Return income on a specific date
         """
@@ -123,7 +125,7 @@ class AllSalakabatt:
         if income_code.upper() not in combined_income_code:
             return 0
 
-        if not isinstance(date_val, datetime.date):
+        if not isinstance(date_val, datetime.datetime):
             raise ValueError(f'Invalid date: {date_val}')
 
         # Tax Data
@@ -134,12 +136,15 @@ class AllSalakabatt:
         if income_code.upper() in NON_TAX_INCOME_CODE_MAP:
             COLUMN_INDEX = NON_TAX_INCOME_CODE_MAP.get(income_code.upper())
             data = self.non_tax_data
-
-        income_by_date = data[data.iloc[:, 2] == date_val].iloc[:, COLUMN_INDEX].sum()
         
-        return income_by_date
-# FILES_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../', 'staticfiles', 'excel', 'xlsx'))
+        data.iloc[:, 2] = data.iloc[:, 2].apply(lambda x: datetime.datetime.strptime(x, '%d/%m/%Y') if isinstance(x, str) else x)
 
-# ALL_FILES = [
-#     "/mnt/c/Users/Asus/OneDrive/Desktop/ProjectTest/KAM12_MonthlyReport_Jan_2024.xlsx",
-#     ]
+        income_by_date = data[data.iloc[:, 2] == date_val][COLUMN_INDEX].sum()
+            
+        return income_by_date
+    
+
+# file_path = "/mnt/c/Users/Asus/OneDrive/Desktop/ProjectTest/KAM12_MonthlyReport_Jan_2024.xlsx"
+
+# test = AllSalakabatt([file_path])
+# test.income_by_date(datetime.datetime(2024, 4, 1), 'VPP')

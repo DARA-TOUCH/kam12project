@@ -34,8 +34,6 @@ class List01View(View):
         budget = request.FILES.get('budget')
         salakabatt_files = [request.FILES.get(f'salakabatt_for_{month}') for month in self.salakabatt_files]
 
-        print(f"Sad Detail: {sad_detail}")
-        print(f"Budget: {budget}")
         for i, file in enumerate(salakabatt_files, start=1):
             print(f"File-{i} : {file}")
 
@@ -45,11 +43,6 @@ class List01View(View):
         os.makedirs(os.path.dirname(list01_copy), exist_ok=True)
         shutil.copy2(list01_template, list01_copy)
 
-        print(f' Type of list01_template: {type(list01_template)}')
-        print(f' Type of list01_copy: {type(list01_copy)}')
-    
-        # Make directory for List01. Ensure the directory exists
-        
         # Create a temporary directory to store the uploaded files (salakabatt)
         temp_dir = os.path.join(settings.BASE_DIR, 'temp', 'list01')
         temp_dir_sad_and_budget = os.path.join(settings.BASE_DIR, temp_dir, 'list01', 'sad_and_budget')
@@ -68,7 +61,7 @@ class List01View(View):
         # Save salakabatt files to the temp_dir_salakabatt directory
         for i, file in enumerate(salakabatt_files, start=0):
             if file:
-                file_path = os.path.join(temp_dir_salakabatt, f'salakabatt_for_{self.salakabatt_files[i]}.xlsx')
+                file_path = os.path.join(temp_dir_salakabatt, f'{file.name}')
                 with open(file_path, 'wb+') as destination:
                     for chunk in file.chunks():
                         destination.write(chunk)

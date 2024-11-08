@@ -47,7 +47,7 @@ class List01:
         for sh in list01_wb.sheetnames:
             for row in range(93, 2704, 87):
                 for i in range(1, 87):
-                    if list01_wb[sh][f'E{row+i}'].value is not None:
+                    if list01_wb[sh][f'E{row+i}'].value:
                         list01_wb[sh][f"K{row+i}"].value = budget.get_return_amount_by_date(
                                         income_code=list01_wb[sh][f"E{row+i}"].value,
                                         in_or_out="I",
@@ -57,5 +57,4 @@ class List01:
                                         income_code=list01_wb[sh][f"E{row+i}"].value,
                                         date_val=list01_wb[sh][f"A{row}"].value
                                         )
-
         list01_wb.save(self.template_file)
