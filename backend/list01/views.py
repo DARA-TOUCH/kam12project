@@ -25,18 +25,27 @@ class List01View(View):
         None
     """
     salakabatt_files = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    office_choices = {
+        'KAM11': 'ការិយាល័យគយនិងរដ្ឋាករតន់ហន់',
+        'KAM12': 'ការិយាល័យគយនិងរដ្ឋាករព្រែកចាក',
+        'KAM16': 'ការិយាល័យគយនិងរដ្ឋាករកំពង់ផែអន្តរជាតិព្រែកត្នោត',
+        'KAM17': 'ការិយាល័យគយនិងរដ្ឋាករកំពង់ផែអន្តរជាតិខេត្តកំពត',
+    }
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'index.html', {'salakabatt_files': self.salakabatt_files})
+        return render(request, 'index.html', {
+            'salakabatt_files': self.salakabatt_files, 
+            'office_choices': self.office_choices
+            })
 
     def post(self, request, *args, **kwargs):
         sad_detail = request.FILES.get('sad_detail')
         budget = request.FILES.get('budget')
         salakabatt_files = [request.FILES.get(f'salakabatt_for_{month}') for month in self.salakabatt_files]
-
-        for i, file in enumerate(salakabatt_files, start=1):
-            print(f"File-{i} : {file}")
-
+        reporter_name = request.POST.get('reporter_name')
+        office_code_key = request.POST.get('office_code')
+        
+        
         # Copy the template file to a new file
         list01_template = os.path.join(settings.BASE_DIR, 'staticfiles', 'excel', 'xlsx', 'List01_Template.xlsx')
         list01_copy = os.path.join(settings.BASE_DIR, 'staticfiles', 'excel', 'xlsx', 'List01.xlsx')
@@ -82,7 +91,8 @@ class List01View(View):
             sad_detail_file=sad_detail_path, 
             list_of_salakabatt_path=salakabatt_files
             )
-        list01.write()
+        
+        list01.write(reporter_name=reporter_name, office_choice=self.office_choices.get(office_code_key, ''))
 
         # Serve the file as a downloadable response
         response = FileResponse(open(list01_copy, 'rb'), as_attachment=True, filename='List01.xlsx')
@@ -146,18 +156,29 @@ class DownloadSalakabattDataView(View):
             messages.error(request, "File not found.")
         return render(request, 'salakabatt.html')
 
-def cleanup(request):
-    # items = ['VPP', 'VOP', 'VAP', 'SPP', 'SOP', 'COP']
-    # if request.method == 'POST':
-    #     for index, item in enumerate(items, start=1):
-    #         text_value = request.POST.get(f'item_{i}')
-    #     return HttpResponseRedirect(request.path_info)
-    # return render(request, 'cleanup_list01.html', {'items': items})
-    pass
+class ListCleanUp(View):
+    CODES = ['VVP', 'VOP', 'SPP', 'SOP', 'CSF', 'TSF', 'TSP', 'TSS', 
+             'TSC', 'TSM', 'TST', 'TSA', 'TSL', 'TSD', 'TSE', 'TSB', 
+             'TSG', 'TSK', 'TSZ', 'TSR', 'TSQ', 'TSJ', 'TSN', 'TSO', 
+             'TSP', 'TSV', 'TSW', 'TSX', 'TSY', 'TSZ', 'TSU']
+    
+    def get(self, request, *args, **kwargs):
+        return render(request, 'cleanup_list01.html', {'codes':self.CODES})
+    
+    def post(self, request, *args, **kwargs):
+        selected_codes = request.POST.getlist('codes')
+        print(selected_codes)
+        print(type(selected_codes))
+        return render(request, 'cleanup_list01.html', {
+            'codes': self.CODES,
+            'selected_codes': selected_codes
+        })
+    
+    # ជំហ៊ានបន្ទាប់ពីការជ្រើសរើសកូដដែលត្រូវបានជ្រើសរើស ត្រូវកំណត់ថា ដូចំណូលដែលមាននៅក្នុងselected_codes ត្រូវបានលុបចេញពីList01
+
 
 class List01MakeUpView(View):
     def get(self, request, *args, **kwargs):
-        
         return render(request, 'makeup_list01.html')
 
     def post(self, request, *args, **kwargs):

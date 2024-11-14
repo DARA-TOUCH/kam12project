@@ -28,7 +28,7 @@ class List01:
         self.sad_detail_file = sad_detail_file
         self.list_of_salakabatt_path = list_of_salakabatt_path
 
-    def write(self):
+    def write(self, reporter_name: str, office_choice: str):
         list01_wb = openpyxl.load_workbook(self.template_file, data_only=False)
         ws = list01_wb.active
         budget = BudgetAccount(self.budget_file)
@@ -44,15 +44,22 @@ class List01:
             for row in range(93, 2704, 87):
                 list01_wb[sh][f"A{row}"].value = temp_wb[sh][f"A{row}"].value
 
+        SKIP_CELL = ['TRF', 'CPF', 'VAP', '', None] # Cells that it column E contain formulaor blank  should be skipped for calculation
+
+        
         for sh in list01_wb.sheetnames:
+            list01_wb[sh]['U3051'].value = reporter_name
+            list01_wb[sh]['A1'].value = f'{list01_wb[sh]['A1'].value} {office_choice}'
             for row in range(93, 2704, 87):
                 for i in range(1, 87):
-                    if list01_wb[sh][f'E{row+i}'].value:
+                    if list01_wb[sh][f'E{row+i}'].value not in SKIP_CELL:
+                        # Revenue (In)
                         list01_wb[sh][f"K{row+i}"].value = budget.get_return_amount_by_date(
                                         income_code=list01_wb[sh][f"E{row+i}"].value,
                                         in_or_out="I",
                                         date_val=list01_wb[sh][f"A{row}"].value
                                         )
+                        # Paid to National
                         list01_wb[sh][f"M{row+i}"].value = salakabatt.income_by_date(
                                         income_code=list01_wb[sh][f"E{row+i}"].value,
                                         date_val=list01_wb[sh][f"A{row}"].value

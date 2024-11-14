@@ -4,13 +4,22 @@
 
 {% block content %}
 <h1>List01 Cleanup</h1>
+<style> 
+    .checkbox-label { display: flex; align-items: center; margin-bottom: 8px; } 
+    .checkbox-label input[type="checkbox"] { margin-right: 10px; width: 20px; height: 20px; /* Adjust size as needed */ } 
+</style>
 
 <form method="POST" action="{% url 'list01:cleanup' %}">
     {% csrf_token %}
-    {% for item in items %}
-        <input type="checkbox" value="{{ item }}">
-        <label for="{{ item }}">{{ item }}</label><br>
-    {% endfor %}
+    <label for="codes"> Select Code for Deleting </label>
+    <ul id="codes">
+        {% for code in codes %}
+        <li class="checkbox-label">
+            <input type="checkbox" id="code_{{ forloop.counter }}" name="codes" value="{{ code }}">
+            <label for="code_{{ forloop.counter }}">{{ code }}</label>
+        </li>
+        {% endfor %}
+    </ul>
     <button type="submit">Submit</button>
 </form>
 

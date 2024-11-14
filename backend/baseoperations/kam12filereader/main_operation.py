@@ -109,8 +109,6 @@ class BudgetAccount:
                 (self.df["Budget Code"] == income_code.upper())]["Amount"].sum()
 
 
-
-
 class SADDetail:
     """
     - This class is created an object based on pandas library and excel file in .xlsx format from https://stats-admin.customs.gov.kh/

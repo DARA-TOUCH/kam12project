@@ -26,6 +26,22 @@
                     <label for="budget" class="form-label">Budget File</label>
                     <input type="file" name="budget" id="budget" class="form-control">
                 </div>
+                
+                <div class="p-3 mb-2 bg-secondary text-white">
+                    <div>
+                        <label for="reporter_name">You Name</label>
+                        <input type="text" name="reporter_name" id="reporter_name" placeholder="Your Full Name Here" class="form-control">
+                    </div><br>
+
+                    <div>
+                        <label for="office_code">Select Office Code</label>
+                        <select id="office_code" name="office_code"> 
+                            {% for office_code, office_name in office_choices.items %} 
+                                <option value="{{ office_code }}">{{ office_code }}</option> 
+                            {% endfor %} 
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Second Column -->
@@ -37,7 +53,6 @@
                         <input type="file" name="salakabatt_for_{{file}}" id="salakabatt_for_{{file}}" class="form-control">
                     </div>
                 {% endfor %}
-                
             </div>
             
             <div class="mt-4">
@@ -46,7 +61,6 @@
                     to create the LIST01.
                 </p>
             </div>
-        
         </div>
     </div>
 </form>

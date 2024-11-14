@@ -124,7 +124,6 @@ class AllSalakabatt:
 
         if income_code.upper() not in combined_income_code:
             return 0
-
         if not isinstance(date_val, datetime.datetime):
             raise ValueError(f'Invalid date: {date_val}')
 
@@ -144,7 +143,8 @@ class AllSalakabatt:
         return income_by_date
     
 
-# file_path = "/mnt/c/Users/Asus/OneDrive/Desktop/ProjectTest/KAM12_MonthlyReport_Jan_2024.xlsx"
+file_path = "/mnt/c/Users/Asus/OneDrive/Desktop/ProjectTest/KAM12_MonthlyReport_Jan_2024.xlsx"
 
 # test = AllSalakabatt([file_path])
-# test.income_by_date(datetime.datetime(2024, 4, 1), 'VPP')
+# dara = test.income_by_date(datetime.datetime(2024, 4, 1), 'VOP')
+# print(dara)

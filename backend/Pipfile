@@ -12,6 +12,8 @@ numpy = "*"
 djangorestframework-simplejwt = "*"
 django-cors-headers = "*"
 selenium = "*"
+pdfplumber = "*"
+pypdf2 = "*"
 
 [dev-packages]
 
